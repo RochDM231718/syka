@@ -1,0 +1,65 @@
+{
+  "welcome_message": "Welcome to Sirius Achievements!",
+  "api": {
+    "auth": {
+      "invalid_credentials": "Invalid credentials",
+      "invalid_refresh_token": "Invalid or expired refresh token",
+      "invalid_token": "Invalid or expired token",
+      "invalid_authorization_token": "Authorization header missing or invalid",
+      "user_not_found": "User not found"
+    }
+  },
+  "admin": {
+    "sign_in": "Sign in",
+    "email": "Email address",
+    "password": "Password",
+    "confirm_password": "Confirm password",
+    "reset_password": "Reset password",
+    "forgot_password": "Forgot password?",
+    "forgot_password_title": "Forgot password",
+    "submit": "Submit",
+    "menu": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "sing_out": "Sing out",
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "pages": "Pages"
+    },
+    "add": "Add",
+    "actions": "Actions",
+    "no_items_found": "No items can be found.",
+    "failed_delete": "Failed to delete",
+    "back": "Back",
+    "save": "Save",
+    "dashboard": {
+      "title": "Dashboard",
+      "message": "Hi {user}, welcome to {platform}."
+    },
+    "users": {
+      "title": "Users",
+      "search": "Type here...",
+      "user": "User",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "role": "Role",
+      "phone": "Phone",
+      "status": "Status",
+      "delete_confirmation": "Are you sure you want to delete this user?",
+      "create_user_title": "Create user",
+      "edit_user_title": "Edit user"
+    },
+    "pages": {
+      "index_title": "Pages",
+      "title": "Title",
+      "slug": "Slug",
+      "content": "Content",
+      "published_at": "Published at",
+      "delete_confirmation": "Are you sure you want to delete this page?",
+      "create_title": "Create page",
+      "edit_title": "Edit page"
+    }
+  }
+
+}

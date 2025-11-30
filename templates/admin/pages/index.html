@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+{% set title = gettext('admin.pages.index_title') %}
+{% block content %}
+<h2 class="card-title">{{ title }}</h2>
+<div class="row">
+    <div class="col-12">
+         <a href="{{ url_for('admin.pages.create') }}" class="btn btn-secondary rounded-3 float-end">{{ gettext('admin.add') }}</a>
+    </div>
+</div>
+{% if pages|length > 0 %}
+    <table class="table">
+    <thead>
+        <th class="col">{{ gettext('admin.pages.title') }}</th>
+        <th class="col">{{ gettext('admin.pages.slug') }}</th>
+        <th class="col">{{ gettext('admin.pages.published_at') }}</th>
+        <th class="col">{{ gettext('admin.actions') }}</th>
+    </thead>
+     <tbody>
+     {% for page in pages %}
+        <tr>
+            <td>{{ page.title }}</td>
+            <td>{{ page.slug }}</td>
+            <td> {{ page.published_at.strftime("%m/%d/%Y") if page.published_at else ""  }}</td>
+            <td>
+                   <a class="btn btn-light" href="{{ url_for('admin.pages.edit', id=page.id) }}" >
+                     <i class="fa fa-pencil" aria-hidden="true"></i>
+                   </a>
+                     <a href="#" onclick="deleteItem({{ page.id }})" class="btn btn-danger">
+                       <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </a>
+            </td>
+        </tr>
+     {% endfor %}
+     </tbody>
+</table>
+{% else %}
+  <p class="mb-1 mt-1 p-2 ">{{ gettext('admin.no_items_found') }}</p>
+{% endif %}
+<script>
+async function deleteItem(id) {
+    if (!confirm("{{ gettext('admin.pages.delete_confirmation') }}")) return;
+    const res = await fetch(`/admin/pages/${id}`, { method: "DELETE" });
+    if (res.ok) {
+        location.reload();
+    } else {
+        alert("{{ gettext('admin.failed_delete') }}");
+    }
+}
+</script>
+{% endblock %}

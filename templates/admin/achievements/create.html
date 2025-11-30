@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+{% set title = "Upload Achievement" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">Upload Achievement</h5>
+            </div>
+            <div class="card-body">
+                {% if error_msg %}
+                    <div class="alert alert-danger">{{ error_msg }}</div>
+                {% endif %}
+
+                <form method="post" action="{{ url_for('admin.achievements.store') }}" enctype="multipart/form-data">
+
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control" id="title" required placeholder="e.g. Olympiad Winner Certificate">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea name="description" class="form-control" id="description" rows="3" placeholder="Optional details..."></textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="file" class="form-label">Document File <span class="text-danger">*</span></label>
+                        <input type="file" name="file" class="form-control" id="file" required>
+                        <div class="form-text">Supported formats: PDF, JPG, PNG</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.achievements.index') }}" class="btn btn-light">Cancel</a>
+                        <button type="submit" class="btn btn-success">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
