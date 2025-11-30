@@ -118,9 +118,7 @@
 
 <script>
     function updateFileName(input) {
-        // Получаем переведенный текст "Файл не выбран" из шаблона
         const defaultText = "{{ gettext('admin.no_file_chosen') }}";
-        // Если файл выбран, берем его имя, иначе возвращаем дефолтный текст
         const fileName = input.files[0] ? input.files[0].name : defaultText;
         document.getElementById('avatar-text').value = fileName;
     }

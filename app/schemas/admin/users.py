@@ -42,7 +42,7 @@ class UserOut(BaseModel):
     last_name: str
     is_active: bool
     role: UserRole
-    status: Optional[UserStatus] = None # Разрешаем None изначально
+    status: Optional[UserStatus] = None
     avatar_path: Optional[str] = None
     phone_number: Optional[str] = ''
 
