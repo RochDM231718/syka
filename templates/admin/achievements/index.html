@@ -1,0 +1,70 @@
+{% extends 'layout.html' %}
+{% set title = "My Achievements" %}
+{% block content %}
+<div class="row mb-3">
+    <div class="col-6">
+        <h3>My Achievements</h3>
+    </div>
+    <div class="col-6 text-end">
+        <a href="{{ url_for('admin.achievements.create') }}" class="btn btn-primary rounded-3">
+            <i class="fa fa-plus"></i> Upload New
+        </a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>File</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for achievement in achievements %}
+            <tr>
+                <td>
+                    <strong>{{ achievement.title }}</strong>
+                    {% if achievement.description %}
+                        <br><small class="text-muted">{{ achievement.description }}</small>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if achievement.status.value == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% elif achievement.status.value == 'approved' %}
+                        <span class="badge bg-success">Approved</span>
+                    {% else %}
+                        <span class="badge bg-danger">Rejected</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {{ achievement.created_at.strftime('%Y-%m-%d') }}
+                </td>
+                <td>
+                    <a href="/{{ achievement.file_path }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                        <i class="fa fa-download"></i> View
+                    </a>
+                </td>
+                <td>
+                    <form action="{{ url_for('admin.achievements.delete', id=achievement.id) }}" method="post" onsubmit="return confirm('Are you sure?');">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center py-4 text-muted">
+                    No achievements uploaded yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

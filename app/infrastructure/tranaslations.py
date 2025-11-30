@@ -1,0 +1,43 @@
+import json
+from pathlib import Path
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+class TranslationManager:
+    def __init__(self, translation_dir: str = 'translations'):
+        self.translations_dir = Path(translation_dir)
+        self.translations = self._load_translations()
+
+    def _load_translations(self):
+        translations = {}
+
+        for file in self.translations_dir.glob('*.json'):
+            lang_code = file.stem
+            with open(file, 'r', encoding='utf-8') as f:
+                translations[lang_code] = json.load(f)
+
+        return translations
+
+    def gettext(self, key: str, replacements: dict = None, lang: str = None):
+        if lang is None:
+            lang = os.getenv("LANGUAGE")
+        lang_data = self.translations.get(lang, self.translations.get("en", {}))
+        current_data = lang_data
+        keys = key.split('.')
+
+        for part in keys:
+            if isinstance(current_data, dict) and part in current_data:
+                current_data = current_data[part]
+            else:
+                return key
+
+        if isinstance(current_data, str):
+            if replacements:
+                try:
+                    current_data = current_data.format(**replacements)
+                except KeyError:
+                    pass
+            return current_data
+        else:
+            return key

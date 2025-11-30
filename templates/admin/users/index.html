@@ -1,0 +1,139 @@
+{% extends 'layout.html' %}
+{% set title = gettext('admin.users.title') %}
+{% block content %}
+<h2 class="card-title">{{ title }}</h2>
+
+<form method="get" action="{{ url_for('admin.users.index') }}" class="row position-relative">
+    <div class="col-12">
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="query-search"><i class="fa fa-search" aria-hidden="true"></i></span>
+            <input type="text" class="form-control" id="user-search-input" name="query" value="{{ query }}" placeholder="{{ gettext('admin.users.search') }}" aria-describedby="query-search" autocomplete="off">
+        </div>
+        <div id="search-results" class="list-group position-absolute w-100 shadow" style="z-index: 1000; top: 40px; display: none;">
+        </div>
+    </div>
+</form>
+
+{% if users|length > 0 %}
+<table class="table table-hover align-middle">
+<thead>
+    <th class="col">{{ gettext('admin.users.user') }}</th>
+    <th class="col">{{ gettext('admin.users.email') }}</th>
+    <th class="col">{{ gettext('admin.users.role') }}</th>
+    <th class="col">{{ gettext('admin.users.phone') }}</th>
+    <th class="col">{{ gettext('admin.users.status') }}</th>
+    <th class="col text-end">{{ gettext('admin.actions') }}</th>
+</thead>
+ <tbody>
+    {% for user in users%}
+        <tr>
+            <td>
+                <div class="d-flex align-items-center">
+                    {% if user.avatar_path %}
+                        <img src="/{{ user.avatar_path }}" class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-2" style="width: 32px; height: 32px; font-size: 0.8rem;">
+                            {{ user.first_name[0] }}{{ user.last_name[0] }}
+                        </div>
+                    {% endif %}
+                    {{ user.first_name }} {{ user.last_name }}
+                </div>
+            </td>
+            <td>{{ user.email }}</td>
+            <td><span class="badge bg-secondary">{{ user.role.value }}</span></td>
+            <td>{{ user.phone_number }}</td>
+            <td>
+                {% if user.status.value == 'active' %}
+                    <span class="badge bg-success">Active</span>
+                {% elif user.status.value == 'pending' %}
+                    <span class="badge bg-warning text-dark">Pending</span>
+                {% else %}
+                    <span class="badge bg-danger">{{ user.status.value }}</span>
+                {% endif %}
+            </td>
+            <td class="text-end">
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.users.show', id=user.id) }}" title="View Profile">
+                     <i class="fa fa-eye" aria-hidden="true"></i>
+                </a>
+
+                {% if request.session['auth_id'] == user.id %}
+                <a class="btn btn-sm btn-light" href="{{ url_for('admin.users.edit', id=user.id) }}" title="Edit My Profile">
+                     <i class="fa fa-pencil" aria-hidden="true"></i>
+                </a>
+                {% endif %}
+
+                {% if request.session['auth_id'] != user.id and request.session['auth_role'] in ['moderator', 'super_admin'] %}
+                    <button class="btn btn-sm btn-danger ms-1" onclick="deleteUser({{ user.id }})" title="Delete User">
+                       <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    </button>
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+ </tbody>
+</table>
+ {% else %}
+    <p class="mb-1 mt-1 p-2 text-muted text-center">{{ gettext('admin.no_items_found') }}</p>
+{% endif %}
+
+<script>
+async function deleteUser(id) {
+    if (!confirm("{{ gettext('admin.users.delete_confirmation') }}")) return;
+    const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
+    if (res.ok) {
+        location.reload();
+    } else {
+        alert("{{ gettext('admin.failed_delete') }}");
+    }
+}
+
+const searchInput = document.getElementById('user-search-input');
+const resultsContainer = document.getElementById('search-results');
+
+searchInput.addEventListener('input', async function() {
+    const query = this.value.trim();
+    if (query.length < 2) {
+        resultsContainer.style.display = 'none';
+        return;
+    }
+    try {
+        const response = await fetch(`/admin/users/search?query=${encodeURIComponent(query)}`);
+        const users = await response.json();
+        if (users.length > 0) {
+            resultsContainer.innerHTML = '';
+            users.forEach(user => {
+                const item = document.createElement('a');
+                item.href = `/admin/users/${user.id}`;
+                item.className = 'list-group-item list-group-item-action d-flex align-items-center';
+                let avatarHtml = '';
+                if (user.avatar) {
+                    avatarHtml = `<img src="/${user.avatar}" class="rounded-circle me-2" style="width: 30px; height: 30px; object-fit: cover;">`;
+                } else {
+                    const initials = user.name.split(' ').map(n => n[0]).join('').substring(0, 2);
+                    avatarHtml = `<div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-2" style="width: 30px; height: 30px; font-size: 0.7rem;">${initials}</div>`;
+                }
+                item.innerHTML = `
+                    ${avatarHtml}
+                    <div>
+                        <div class="fw-bold">${user.name}</div>
+                        <small class="text-muted">${user.email}</small>
+                    </div>
+                `;
+                resultsContainer.appendChild(item);
+            });
+            resultsContainer.style.display = 'block';
+        } else {
+            resultsContainer.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Search error:', error);
+    }
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target !== searchInput && e.target !== resultsContainer) {
+        resultsContainer.style.display = 'none';
+    }
+});
+</script>
+{% endblock %}
