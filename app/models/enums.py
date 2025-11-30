@@ -1,20 +1,20 @@
 from enum import Enum
 
 class UserRole(str, Enum):
-    GUEST = "guest"             # Только зарегистрировался
-    STUDENT = "student"         # Одобренный ученик
-    MODERATOR = "moderator"     # Проверяет достижения
-    SUPER_ADMIN = "super_admin" # Главный админ
+    GUEST = "guest"
+    STUDENT = "student"
+    MODERATOR = "moderator"
+    SUPER_ADMIN = "super_admin"
 
 class UserStatus(str, Enum):
-    PENDING = "pending"   # На проверке
-    ACTIVE = "active"     # Активен
-    BANNED = "banned"     # Забанен
+    PENDING = "pending"
+    ACTIVE = "active"
+    BANNED = "banned"
 
 class AchievementStatus(str, Enum):
-    PENDING = "pending"   # Ждет проверки
-    APPROVED = "approved" # Одобрено
-    REJECTED = "rejected" # Отклонено
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
 
 class UserTokenType(str, Enum):
     RESET_PASSWORD = "reset_password"

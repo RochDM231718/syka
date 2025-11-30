@@ -21,7 +21,6 @@ class CrudRepository(AbstractRepository):
         return items.all()
 
     def create(self, obj_in):
-        # Если пришел словарь, используем его, иначе конвертируем модель в словарь
         obj_data = obj_in if isinstance(obj_in, dict) else obj_in.dict()
         db_obj = self.model(**obj_data)
         self.db.add(db_obj)
@@ -31,7 +30,6 @@ class CrudRepository(AbstractRepository):
 
     def update(self, id: int, obj_in):
         db_obj = self.find(id)
-        # Исправление: проверяем, является ли obj_in словарем
         if isinstance(obj_in, dict):
             update_data = obj_in
         else:

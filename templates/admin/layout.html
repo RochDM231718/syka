@@ -9,7 +9,6 @@
     <link href="{{ url_for('static', path='assets/css/style.css') }}" rel="stylesheet"/>
 
     <style>
-        /* Стили для кнопки переключения в самой странице */
         .sidebar-toggle-btn {
             cursor: pointer;
             border: none;
@@ -23,7 +22,6 @@
             color: var(--brand-purple) !important;
         }
 
-        /* --- ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ КНОПОК МЕНЮ --- */
         .btn-sidebar {
             display: flex;
             align-items: center;
@@ -213,16 +211,13 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const body = document.body;
-            // --- ТЕМНАЯ ТЕМА ---
             const toggleSwitch = document.querySelector('#darkModeSwitch');
 
-            // Устанавливаем начальное состояние
             if (localStorage.getItem('theme') === 'dark') {
                 body.classList.add('dark-mode');
                 if(toggleSwitch) toggleSwitch.checked = true;
             }
 
-            // Добавляем слушателя событий
             if(toggleSwitch) {
                 toggleSwitch.addEventListener('change', () => {
                     if (toggleSwitch.checked) {
@@ -235,10 +230,8 @@
                 });
             }
 
-            // --- СВОРАЧИВАНИЕ МЕНЮ ---
             const sidebarToggle = document.querySelector('#sidebarToggle');
 
-            // Восстанавливаем состояние при загрузке
             if (localStorage.getItem('sidebar') === 'collapsed') {
                 body.classList.add('sidebar-collapsed');
             }

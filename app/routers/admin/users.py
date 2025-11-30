@@ -23,7 +23,6 @@ def check_access(request: Request):
         raise HTTPException(status_code=403, detail="Access denied")
 
 
-# --- API ПОИСКА ---
 @router.get('/users/search', response_class=JSONResponse, name='admin.users.search_api')
 async def search_users(request: Request, query: str, db: Session = Depends(get_db)):
     check_access(request)
@@ -49,7 +48,6 @@ async def search_users(request: Request, query: str, db: Session = Depends(get_d
     ]
 
 
-# --- СПИСОК ПОЛЬЗОВАТЕЛЕЙ ---
 @router.get('/users', response_class=HTMLResponse, name="admin.users.index")
 async def index(
         request: Request,
@@ -78,8 +76,6 @@ async def index(
         'total_count': total_count
     })
 
-
-# --- ПРОСМОТР ПРОФИЛЯ ---
 @router.get('/users/{id}', response_class=HTMLResponse, name='admin.users.show')
 async def show(id: int, request: Request, service: UserService = Depends(get_service)):
     check_access(request)
@@ -96,7 +92,6 @@ async def show(id: int, request: Request, service: UserService = Depends(get_ser
     })
 
 
-# --- ОБНОВЛЕНИЕ РОЛИ ---
 @router.post('/users/{id}/role', name='admin.users.update_role')
 async def update_role(
         id: int,
@@ -114,7 +109,6 @@ async def update_role(
     return RedirectResponse(url=request.url_for('admin.users.show', id=id), status_code=302)
 
 
-# --- СОЗДАНИЕ ---
 @router.get('/users/create', response_class=HTMLResponse, name='admin.users.create')
 async def create(request: Request):
     check_access(request)
@@ -137,7 +131,6 @@ async def store(request: Request, db: Session = Depends(get_db), service: UserSe
                                           {'request': request, 'roles': list(UserRole), 'error_msg': str(e)})
 
 
-# --- РЕДАКТИРОВАНИЕ (My Profile) ---
 @router.get('/users/{id}/edit', response_class=HTMLResponse, name='admin.users.edit')
 async def edit(id: int, request: Request, service: UserService = Depends(get_service)):
     if id != request.session.get('auth_id'):
@@ -151,7 +144,7 @@ async def edit(id: int, request: Request, service: UserService = Depends(get_ser
         'roles': list(UserRole),
         'user': user,
         'total_docs': total_docs,
-        'achievements': user.achievements  # <-- ДОБАВИЛИ ЭТО
+        'achievements': user.achievements
     })
 
 
@@ -194,7 +187,7 @@ async def update(
             'user': user,
             'roles': list(UserRole),
             'total_docs': total_docs,
-            'achievements': user.achievements,  # <-- И ЗДЕСЬ ТОЖЕ
+            'achievements': user.achievements,
             'error_msg': str(e)
         })
 

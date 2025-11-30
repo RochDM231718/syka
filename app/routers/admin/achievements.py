@@ -59,11 +59,9 @@ async def store(
         })
 
 
-# --- ОБНОВЛЕННЫЙ МЕТОД DELETE ---
 @router.post('/achievements/{id}/delete', name='admin.achievements.delete')
 async def delete(id: int, request: Request, service: AchievementService = Depends(get_service)):
     user_id = request.session['auth_id']
-    # Получаем роль (по умолчанию 'guest', если нет в сессии)
     user_role = request.session.get('auth_role', 'guest')
 
     service.delete(id, user_id, user_role)

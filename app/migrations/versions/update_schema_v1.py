@@ -9,15 +9,12 @@ from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
-# revision identifiers, used by Alembic.
 revision = 'update_schema_v1'
-# Ссылаемся на ПОСЛЕДНЮЮ существующую миграцию (таблицу Pages)
 down_revision = '620951dcc34a'
 branch_labels = None
 depends_on = None
 
 def upgrade() -> None:
-    # 1. Создаем таблицу achievements
     op.create_table('achievements',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('user_id', sa.Integer(), nullable=True),
@@ -31,16 +28,13 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint('id')
     )
 
-    # 2. Добавляем колонки в users
-    # Пытаемся создать ENUM для статуса пользователя (важно для Postgres)
     try:
         bind = op.get_bind()
-        # Проверка, чтобы не падало на SQLite, где ENUM создается автоматически с таблицей
         if bind.engine.name == 'postgresql':
             status_enum = postgresql.ENUM('PENDING', 'ACTIVE', 'BANNED', name='userstatus')
             status_enum.create(bind)
     except:
-        pass # Игнорируем ошибку, если тип уже есть
+        pass
 
     op.add_column('users', sa.Column('status', sa.Enum('PENDING', 'ACTIVE', 'BANNED', name='userstatus'), nullable=True))
     op.add_column('users', sa.Column('avatar_path', sa.String(), nullable=True))

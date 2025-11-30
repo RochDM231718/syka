@@ -38,16 +38,14 @@ async def authenticate(request: Request, email: str = Form(), password: str = Fo
         return templates.TemplateResponse('auth/sign-in.html',
                                           {"request": request, 'error_msg': "Invalid credentials or account banned."})
     else:
-        # СОХРАНЯЕМ ДАННЫЕ В СЕССИЮ
         request.session['auth_id'] = user.id
         request.session['auth_name'] = user.first_name
-        request.session['auth_role'] = user.role.value  # <--- Добавили сохранение роли
+        request.session['auth_role'] = user.role.value
         return RedirectResponse(url="/admin/dashboard", status_code=302)
 
 
 @router.get('/logout', name='admin.auth.logout')
 async def logout(request: Request):
-    # Очищаем сессию
     keys_to_remove = ['auth_id', 'auth_name', 'auth_role']
     for key in keys_to_remove:
         if key in request.session:

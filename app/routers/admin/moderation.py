@@ -36,7 +36,7 @@ async def ensure_moderator(request: Request, db: Session = Depends(get_db)):
     return user
 
 
-# --- USERS ---
+
 @router.get('/moderation/users', response_class=HTMLResponse, name='admin.moderation.users')
 async def pending_users(
         request: Request,
@@ -74,7 +74,6 @@ async def reject_user(
     return RedirectResponse(url="/admin/moderation/users", status_code=302)
 
 
-# --- ACHIEVEMENTS ---
 @router.get('/moderation/achievements', response_class=HTMLResponse, name='admin.moderation.achievements')
 async def pending_achievements(
         request: Request,
@@ -95,7 +94,7 @@ async def set_achievement_status(
         id: int,
         status: str,
         request: Request,
-        reason: Optional[str] = Form(None),  # <-- Получаем причину из формы
+        reason: Optional[str] = Form(None),
         service: AchievementService = Depends(get_achievement_service),
         admin=Depends(ensure_moderator)
 ):

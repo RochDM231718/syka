@@ -11,7 +11,7 @@ class Mongo(Base):
         return self.uri
 
     def create_all(self):
-        pass  # Mongo je schemaless
+        pass
 
     def drop_all(self):
         self.client.drop_database(self.db.name)

@@ -3,7 +3,7 @@ from typing import Optional, Annotated, Union
 from datetime import datetime, date
 
 def parse_date(value):
-    if value in (None, "", "null"):  # ✅ skip empty
+    if value in (None, "", "null"):
         return None
     if isinstance(value, str):
         try:

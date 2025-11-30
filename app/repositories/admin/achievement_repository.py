@@ -7,9 +7,7 @@ class AchievementRepository(CrudRepository):
     def __init__(self, db: Session):
         super().__init__(db, Achievement)
 
-    # Получить достижения конкретного пользователя
     def get_by_user(self, user_id: int, page: int = 1):
         query = self.db.query(self.model).filter(self.model.user_id == user_id)
-        # Сортируем: новые сверху
         query = query.order_by(self.model.created_at.desc())
         return self.paginate(query, {'page': page}).all()

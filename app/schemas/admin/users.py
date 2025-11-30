@@ -24,7 +24,7 @@ class UserUpdate(BaseModel):
     email: EmailStr
     first_name: str
     last_name: str
-    role: Optional[UserRole] = None # <-- Сделали поле необязательным
+    role: Optional[UserRole] = None
     phone_number: Optional[str] = None
 
     @staticmethod

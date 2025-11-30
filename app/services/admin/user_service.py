@@ -57,31 +57,26 @@ class UserService(BaseCrudService[Users, UserCreate, UserUpdate]):
     Сохраняет файл аватарки на диск и возвращает путь для сохранения в БД.
     Путь сохранения: static/uploads/avatars/avatar_{user_id}_{uuid}.{ext}
     """
-        # 1. Определяем путь к папке загрузок
+
         upload_dir = Path("static/uploads/avatars")
         upload_dir.mkdir(parents=True, exist_ok=True)
 
-        # 2. Генерируем имя файла: avatar_{user_id}_{random}.{ext}
         filename_parts = file.filename.split('.')
         file_extension = filename_parts[-1] if len(filename_parts) > 1 else "png"
 
-        # Добавляем UUID, чтобы имя файла менялось при каждом обновлении
         unique_code = uuid.uuid4().hex[:8]
         filename = f"avatar_{user_id}_{unique_code}.{file_extension}"
         file_path = upload_dir / filename
 
-        # Удаляем старые аватарки этого пользователя
         for old_file in upload_dir.glob(f"avatar_{user_id}_*"):
             try:
                 old_file.unlink()
             except:
                 pass
 
-        # 3. Сохраняем файл
         with file_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        # 4. Возвращаем путь относительно корня проекта (для src в HTML)
         return f"static/uploads/avatars/{filename}"
 
     def get_pending_users(self):

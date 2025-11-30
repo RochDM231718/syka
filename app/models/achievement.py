@@ -19,10 +19,8 @@ class Achievement(Base):
 
     status = Column(SQLAlchemyEnum(AchievementStatus), default=AchievementStatus.PENDING)
 
-    # НОВОЕ ПОЛЕ
     rejection_reason = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # Связь с пользователем
     user = relationship("Users", back_populates="achievements")

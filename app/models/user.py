@@ -22,5 +22,4 @@ class Users(Base):
     status = Column(SQLAlchemyEnum(UserStatus), default=UserStatus.PENDING)
     avatar_path = Column(String, nullable=True)
 
-    # Связь с достижениями
     achievements = relationship("Achievement", back_populates="user")

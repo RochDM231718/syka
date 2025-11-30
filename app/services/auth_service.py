@@ -31,8 +31,6 @@ class AuthService:
         self.model = self.db.query(Users)
 
     def authenticate(self, email: str, password: str, role: str):
-        # Разрешаем вход, если роль совпадает ИЛИ если это супер-админ (он может всё)
-        # Также проверяем, активен ли пользователь
         user = self.model.filter(Users.email == email).first()
 
         if not user:
@@ -41,12 +39,9 @@ class AuthService:
         if not self.verify_password(password, user.hashed_password):
             return None
 
-        # Проверка блокировки
         if user.status == UserStatus.BANNED:
             return None
 
-        # Здесь можно добавить логику: пускать ли GUEST в админку?
-        # Пока пустим всех, кто есть в базе и прошел пароль.
         return user
 
     def api_authenticate(self, email: str, password: str, role: str = "User"):
@@ -71,23 +66,19 @@ class AuthService:
             }
         }
 
-    # --- НОВЫЙ МЕТОД ---
     def register(self, data: RegisterSchema) -> bool:
-        # 1. Проверяем email
         if self.model.filter(Users.email == data.email).first():
-            return False  # Пользователь уже существует
+            return False
 
-        # 2. Хешируем пароль
         hashed_pw = pwd_context.hash(data.password)
 
-        # 3. Создаем пользователя
         new_user = Users(
             first_name=data.first_name,
             last_name=data.last_name,
             email=data.email,
             hashed_password=hashed_pw,
-            role=UserRole.GUEST,  # Роль Гость
-            status=UserStatus.PENDING,  # Статус На проверке
+            role=UserRole.GUEST,
+            status=UserStatus.PENDING,
             is_active=True
         )
 
@@ -98,7 +89,6 @@ class AuthService:
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         return pwd_context.verify(plain_password, hashed_password)
 
-    # Get authenticated user by session
     def user(self, request: Request):
         if 'auth_id' in request.session:
             user = self.model.filter(Users.id == request.session['auth_id']).first()

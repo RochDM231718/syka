@@ -22,7 +22,6 @@ def check_access(request: Request):
         raise HTTPException(status_code=403, detail="Access denied")
 
 
-# --- API ПОИСКА ---
 @router.get('/pages/search', response_class=JSONResponse, name='admin.pages.search_api')
 async def search_documents(request: Request, query: str, db: Session = Depends(get_db)):
     check_access(request)
@@ -48,8 +47,6 @@ async def search_documents(request: Request, query: str, db: Session = Depends(g
         for doc in documents
     ]
 
-
-# --- СПИСОК ВСЕХ ДОКУМЕНТОВ ---
 @router.get('/pages', response_class=HTMLResponse, name="admin.pages.index")
 async def index(
         request: Request,
@@ -58,11 +55,8 @@ async def index(
 ):
     check_access(request)
 
-    # 1. Формируем Базовый Запрос (ОБЯЗАТЕЛЬНО c JOIN Users)
-    # Это отфильтрует достижения удаленных пользователей
     base_query = db.query(Achievement).join(Users)
 
-    # 2. Применяем фильтры поиска
     if query:
         base_query = base_query.filter(
             or_(
@@ -72,21 +66,17 @@ async def index(
             )
         )
 
-    # 3. Считаем количество ДО применения лимитов
     total_count = base_query.count()
 
-    # 4. Получаем данные для таблицы (сортировка + лимит)
     documents = base_query.order_by(Achievement.created_at.desc()).limit(50).all()
 
     return templates.TemplateResponse('pages/index.html', {
         'request': request,
         'query': query,
         'documents': documents,
-        'total_count': total_count  # Теперь цифра будет совпадать с реальностью
+        'total_count': total_count
     })
 
-
-# --- УДАЛЕНИЕ ---
 @router.post('/pages/{id}/delete', name='admin.pages.delete')
 async def delete_document(
         id: int,

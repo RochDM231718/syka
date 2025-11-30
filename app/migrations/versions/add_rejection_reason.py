@@ -8,9 +8,8 @@ Create Date: 2023-10-27 14:00:00.000000
 from alembic import op
 import sqlalchemy as sa
 
-# revision identifiers, used by Alembic.
 revision = 'add_rejection_reason'
-down_revision = 'fix_enums' # Ссылаемся на предыдущую (исправление енамов)
+down_revision = 'fix_enums'
 branch_labels = None
 depends_on = None
 

@@ -55,7 +55,6 @@ class AchievementService:
     def get_all_pending(self):
         return self.repo.getDb().query(Achievement).filter(Achievement.status == AchievementStatus.PENDING).all()
 
-    # --- ОБНОВЛЕННЫЙ МЕТОД ---
     def update_status(self, id: int, status: str, rejection_reason: str = None):
         """Меняет статус и записывает причину отказа (если есть)"""
         data = {"status": status}
@@ -63,7 +62,6 @@ class AchievementService:
         if status == "rejected" and rejection_reason:
             data["rejection_reason"] = rejection_reason
         elif status == "approved":
-            # Если одобрили, очищаем старую причину отказа (если была)
             data["rejection_reason"] = None
 
         self.repo.update(id, data)

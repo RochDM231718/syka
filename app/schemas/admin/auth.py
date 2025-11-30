@@ -24,7 +24,6 @@ class ResetPasswordSchema(BaseModel):
             raise ValueError("Passwords do not match.")
         return self
 
-# --- НОВЫЙ КЛАСС ---
 class RegisterSchema(BaseModel):
     first_name: str = Field(..., min_length=2)
     last_name: str = Field(..., min_length=2)
@@ -35,7 +34,6 @@ class RegisterSchema(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password_strength(cls, v):
-        # Используем ту же логику валидации пароля
         if not re.search(r"[A-Z]", v):
             raise ValueError("Password must contain at least one uppercase letter.")
         if not re.search(r"[a-z]", v):

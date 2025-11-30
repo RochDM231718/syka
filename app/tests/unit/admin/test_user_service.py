@@ -23,7 +23,7 @@ def _get_user():
         first_name="John",
         last_name="Doe",
         is_active=True,
-        role=UserRole.ADMIN,  # or string if your enum uses str
+        role=UserRole.ADMIN,
         phone_number="123456"
     )
 
@@ -40,7 +40,6 @@ def test_get_users(service, mock_repo):
 @patch("services.admin.user_service.templates")
 def test_create_user(mock_templates, mock_send, mock_token_service, mock_create_task, service, mock_repo):
     mock_create_task.return_value = None
-    # Mock input
     obj_in = UserCreate(
         email="new@example.com",
         first_name="John",
@@ -49,23 +48,19 @@ def test_create_user(mock_templates, mock_send, mock_token_service, mock_create_
         hashed_password=None
     )
 
-    # Mock repo create
     user = MagicMock()
     user.id = 1
     user.email = "new@example.com"
     mock_repo.create.return_value = user
 
-    # Mock token service
     mock_token = MagicMock()
     mock_token.token = "reset123"
     mock_token_service.return_value.create.return_value = mock_token
 
-    # Mock template
     mock_template = MagicMock()
     mock_template.render.return_value = "html-content"
     mock_templates.env.get_template.return_value = mock_template
 
-    # Mock request with url_for
     request = MagicMock(spec=Request)
     request.url_for.return_value = "http://test/reset"
     service.set_request(request)
@@ -127,11 +122,9 @@ def test_delete_user_success(service, mock_repo):
     assert result is None
 
 def test_delete_user_not_found(service, mock_repo):
-    # Arrange
     user_id = 999
     mock_repo.delete.side_effect = ValueError("User not found")
 
-    # Act & Assert
     with pytest.raises(ValueError, match="User not found"):
         service.delete(user_id)
 
