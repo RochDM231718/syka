@@ -14,10 +14,14 @@ class Achievement(Base):
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
 
-    file_path = Column(String, nullable=False)  # Ссылка на оригинал файла
-    preview_path = Column(String, nullable=True)  # Ссылка на превью (если нужно)
+    file_path = Column(String, nullable=False)
+    preview_path = Column(String, nullable=True)
 
     status = Column(SQLAlchemyEnum(AchievementStatus), default=AchievementStatus.PENDING)
+
+    # НОВОЕ ПОЛЕ
+    rejection_reason = Column(Text, nullable=True)
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Связь с пользователем

@@ -1,4 +1,3 @@
-import uuid
 from fastapi import Request, Depends, HTTPException, UploadFile, File, Form
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from typing import Optional
@@ -56,10 +55,28 @@ async def index(
         request: Request,
         query: Optional[str] = "",
         page: Optional[int] = 1,
-        service: UserService = Depends(get_service)):
+        service: UserService = Depends(get_service),
+        db: Session = Depends(get_db)):
     check_access(request)
     users = service.get({'query': query, 'page': page})
-    return templates.TemplateResponse('users/index.html', {'request': request, 'query': query, 'users': users})
+
+    count_query = db.query(Users)
+    if query:
+        count_query = count_query.filter(
+            or_(
+                Users.first_name.ilike(f"%{query}%"),
+                Users.last_name.ilike(f"%{query}%"),
+                Users.email.ilike(f"%{query}%")
+            )
+        )
+    total_count = count_query.count()
+
+    return templates.TemplateResponse('users/index.html', {
+        'request': request,
+        'query': query,
+        'users': users,
+        'total_count': total_count
+    })
 
 
 # --- ПРОСМОТР ПРОФИЛЯ ---
@@ -68,16 +85,18 @@ async def show(id: int, request: Request, service: UserService = Depends(get_ser
     check_access(request)
     user = service.find(id)
 
-    # Передаем user.achievements благодаря связи relationship в модели
+    total_docs = len(user.achievements)
+
     return templates.TemplateResponse('users/show.html', {
         'request': request,
         'user': user,
         'roles': list(UserRole),
-        'achievements': user.achievements
+        'achievements': user.achievements,
+        'total_docs': total_docs
     })
 
 
-# --- ОБНОВЛЕНИЕ РОЛИ (ТОЛЬКО СУПЕР-АДМИН) ---
+# --- ОБНОВЛЕНИЕ РОЛИ ---
 @router.post('/users/{id}/role', name='admin.users.update_role')
 async def update_role(
         id: int,
@@ -95,7 +114,7 @@ async def update_role(
     return RedirectResponse(url=request.url_for('admin.users.show', id=id), status_code=302)
 
 
-# --- СОЗДАНИЕ (Кнопка скрыта, но роут есть) ---
+# --- СОЗДАНИЕ ---
 @router.get('/users/create', response_class=HTMLResponse, name='admin.users.create')
 async def create(request: Request):
     check_access(request)
@@ -118,14 +137,22 @@ async def store(request: Request, db: Session = Depends(get_db), service: UserSe
                                           {'request': request, 'roles': list(UserRole), 'error_msg': str(e)})
 
 
-# --- РЕДАКТИРОВАНИЕ (ТОЛЬКО СВОЙ ПРОФИЛЬ) ---
+# --- РЕДАКТИРОВАНИЕ (My Profile) ---
 @router.get('/users/{id}/edit', response_class=HTMLResponse, name='admin.users.edit')
 async def edit(id: int, request: Request, service: UserService = Depends(get_service)):
     if id != request.session.get('auth_id'):
         return RedirectResponse(url=request.url_for('admin.users.show', id=id), status_code=302)
 
     user = service.find(id)
-    return templates.TemplateResponse('users/edit.html', {'request': request, 'roles': list(UserRole), 'user': user})
+    total_docs = len(user.achievements)
+
+    return templates.TemplateResponse('users/edit.html', {
+        'request': request,
+        'roles': list(UserRole),
+        'user': user,
+        'total_docs': total_docs,
+        'achievements': user.achievements  # <-- ДОБАВИЛИ ЭТО
+    })
 
 
 @router.post('/users/{id}', response_class=HTMLResponse, name='admin.users.update')
@@ -142,8 +169,6 @@ async def update(
         form = await request.form()
         form_data = dict(form)
         avatar_file = form_data.pop('avatar', None)
-
-        # Удаляем role из формы, чтобы пользователь не мог сам себе её сменить
         form_data.pop('role', None)
 
         user_data = UserUpdate(**form_data)
@@ -152,28 +177,28 @@ async def update(
         if existing_user and existing_user.id != id:
             raise ValueError("Email already taken")
 
-        # Подготовка данных
         update_payload = user_data.dict(exclude_unset=True)
 
         if avatar_file and hasattr(avatar_file, 'filename') and avatar_file.filename:
             avatar_path = service.save_avatar(id, avatar_file)
             update_payload["avatar_path"] = avatar_path
 
-        # Обновляем
         service.repository.update(id, update_payload)
 
         return RedirectResponse(url="/admin/dashboard", status_code=302)
     except ValueError as e:
         user = service.find(id)
+        total_docs = len(user.achievements)
         return templates.TemplateResponse('users/edit.html', {
             'request': request,
             'user': user,
             'roles': list(UserRole),
+            'total_docs': total_docs,
+            'achievements': user.achievements,  # <-- И ЗДЕСЬ ТОЖЕ
             'error_msg': str(e)
         })
 
 
-# --- УДАЛЕНИЕ ---
 @router.delete('/users/{user_id}', name='admin.users.delete')
 async def delete(user_id: int, request: Request, service: UserService = Depends(get_service)):
     check_access(request)

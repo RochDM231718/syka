@@ -6,36 +6,46 @@ from app.routers.admin.admin import guard_router, templates, get_db
 from app.repositories.admin.achievement_repository import AchievementRepository
 from app.services.admin.achievement_service import AchievementService
 from app.schemas.admin.achievements import AchievementCreate
+from app.models.achievement import Achievement
 
 router = guard_router
+
 
 def get_service(db: Session = Depends(get_db)):
     return AchievementService(AchievementRepository(db))
 
+
 @router.get('/achievements', response_class=HTMLResponse, name="admin.achievements.index")
 async def index(
-    request: Request,
-    page: int = 1,
-    service: AchievementService = Depends(get_service)
+        request: Request,
+        page: int = 1,
+        service: AchievementService = Depends(get_service),
+        db: Session = Depends(get_db)
 ):
     current_user_id = request.session['auth_id']
     achievements = service.get_user_achievements(current_user_id, page)
+
+    total_count = db.query(Achievement).filter(Achievement.user_id == current_user_id).count()
+
     return templates.TemplateResponse('achievements/index.html', {
         'request': request,
-        'achievements': achievements
+        'achievements': achievements,
+        'total_count': total_count
     })
+
 
 @router.get('/achievements/create', response_class=HTMLResponse, name='admin.achievements.create')
 async def create(request: Request):
     return templates.TemplateResponse('achievements/create.html', {'request': request})
 
+
 @router.post('/achievements', response_class=HTMLResponse, name='admin.achievements.store')
 async def store(
-    request: Request,
-    title: str = Form(...),
-    description: str = Form(None),
-    file: UploadFile = File(...),
-    service: AchievementService = Depends(get_service)
+        request: Request,
+        title: str = Form(...),
+        description: str = Form(None),
+        file: UploadFile = File(...),
+        service: AchievementService = Depends(get_service)
 ):
     try:
         user_id = request.session['auth_id']
@@ -48,8 +58,13 @@ async def store(
             'error_msg': f"Error uploading: {str(e)}"
         })
 
+
+# --- ОБНОВЛЕННЫЙ МЕТОД DELETE ---
 @router.post('/achievements/{id}/delete', name='admin.achievements.delete')
 async def delete(id: int, request: Request, service: AchievementService = Depends(get_service)):
     user_id = request.session['auth_id']
-    service.delete(id, user_id)
+    # Получаем роль (по умолчанию 'guest', если нет в сессии)
+    user_role = request.session.get('auth_role', 'guest')
+
+    service.delete(id, user_id, user_role)
     return RedirectResponse(url="/admin/achievements", status_code=302)

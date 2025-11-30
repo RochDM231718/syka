@@ -1,10 +1,9 @@
 {% extends 'layout.html' %}
 {% set title = "Pending Achievements" %}
 {% block content %}
-<div class="row mb-3">
-    <div class="col-12">
-        <h3>Pending Achievements</h3>
-    </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Pending Achievements</h3>
+    <span class="badge bg-secondary fs-6">Total: {{ total_count }}</span>
 </div>
 
 <div class="card shadow-sm">
@@ -50,11 +49,33 @@
                                         <i class="fa fa-check"></i>
                                     </button>
                                 </form>
-                                <form action="{{ url_for('admin.moderation.achievements.update', id=item.id, status='rejected') }}" method="post">
-                                    <button type="submit" class="btn btn-sm btn-danger" title="Reject">
-                                        <i class="fa fa-times"></i>
-                                    </button>
-                                </form>
+
+                                <button type="button" class="btn btn-sm btn-danger"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#rejectRow{{ item.id }}"
+                                        aria-expanded="false"
+                                        title="Reject">
+                                    <i class="fa fa-times"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td colspan="5" class="p-0 border-0">
+                            <div class="collapse bg-light" id="rejectRow{{ item.id }}">
+                                <div class="p-3 border-bottom">
+                                    <form action="{{ url_for('admin.moderation.achievements.update', id=item.id, status='rejected') }}" method="post">
+                                        <div class="mb-2">
+                                            <label class="form-label small fw-bold text-danger">Reason for rejection:</label>
+                                            <textarea name="reason" class="form-control form-control-sm" rows="2" placeholder="Explain why this document is rejected..." required></textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse" data-bs-target="#rejectRow{{ item.id }}">Cancel</button>
+                                            <button type="submit" class="btn btn-sm btn-danger">Confirm Rejection</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </td>
                     </tr>

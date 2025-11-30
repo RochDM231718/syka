@@ -7,25 +7,92 @@
     <link href="{{ url_for('static', path='assets/css/bootstrap.min.css') }}" rel="stylesheet">
      <link href="{{ url_for('static', path='assets/css/font-awesome.min.css') }}" rel="stylesheet"/>
     <link href="{{ url_for('static', path='assets/css/style.css') }}" rel="stylesheet"/>
+
+    <style>
+        /* Стили для кнопки переключения в самой странице */
+        .sidebar-toggle-btn {
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            padding: 0.5rem;
+            margin-right: 1rem;
+            color: var(--brand-purple) !important;
+            transition: color 0.3s;
+        }
+        body.dark-mode .sidebar-toggle-btn {
+            color: var(--brand-purple) !important;
+        }
+
+        /* --- ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ КНОПОК МЕНЮ --- */
+        .btn-sidebar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            border-radius: 6px !important;
+            margin-bottom: 6px !important;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .btn-sidebar:hover {
+            border-color: rgba(255, 255, 255, 0.4) !important;
+        }
+
+        .btn-sidebar.active {
+             border: 1px solid var(--active-indicator) !important;
+        }
+
+        /* Fix: Убираем text-dark из настроек, чтобы применился brand-purple */
+        .navbar-brand,
+        .navbar-nav .nav-link {
+            color: var(--brand-purple) !important;
+        }
+        body.dark-mode .navbar-brand,
+        body.dark-mode .navbar-nav .nav-link {
+            color: var(--brand-purple) !important;
+        }
+    </style>
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-light fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-light fixed-top border-bottom transition-colors">
         <div class="container-fluid">
-            <a class="navbar-brand text-dark fw-bold" href="#">{{ request.state.app_name }}</a>
+
+            <div class="d-flex align-items-center">
+                <button id="sidebarToggle" type="button" class="sidebar-toggle-btn">
+                    <i class="fa fa-bars fa-lg"></i>
+                </button>
+
+                <a class="navbar-brand fw-bold m-0" href="#">
+                    <i class="fa fa-graduation-cap" style="color: var(--brand-purple) !important;"></i>
+                    <span class="d-none d-sm-inline ms-2" style="color: var(--brand-purple) !important;">{{ request.state.app_name }}</span>
+                </a>
+            </div>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-dark" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-user-circle-o fa-lg" aria-hidden="true"></i> {{ gettext('admin.menu.profile') }}
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-cog fa-lg" aria-hidden="true"></i> Settings
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{{ url_for('admin.users.edit', id=request.session['auth_id']) }}"> {{ gettext('admin.menu.settings') }}</a></li>
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown" style="min-width: 220px;">
+                            <li><h6 class="dropdown-header text-uppercase small fw-bold">Appearance</h6></li>
+                            <li>
+                                <div class="dropdown-item d-flex justify-content-between align-items-center" onclick="event.stopPropagation();">
+                                    <span><i class="fa fa-moon-o me-2"></i> Dark Mode</span>
+                                    <div class="form-check form-switch m-0">
+                                        <input class="form-check-input" type="checkbox" id="darkModeSwitch" style="cursor: pointer;">
+                                    </div>
+                                </div>
+                            </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.auth.logout') }}"> {{ gettext('admin.menu.sing_out') }}</a></li>
+                            <li><a class="dropdown-item text-danger" href="{{ url_for('admin.auth.logout') }}">
+                                <i class="fa fa-sign-out me-2"></i> {{ gettext('admin.menu.sing_out') }}
+                            </a></li>
                         </ul>
                     </li>
                 </ul>
@@ -36,59 +103,88 @@
     <div class="container-fluid">
         <div class="row">
 
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-                <div class="position-sticky pt-3">
+            <nav id="sidebarMenu" class="sidebar">
+                <div class="position-sticky pt-4 px-2">
                     <ul class="nav flex-column">
 
                         <li class="nav-item">
-                            <a class="nav-link {% if request.url.path == url_for('admin.dashboard').path %}active{% endif %}"
+                            <a class="nav-link btn-sidebar {% if request.url.path == url_for('admin.users.edit', id=request.session['auth_id']).path %}active{% endif %}"
+                               href="{{ url_for('admin.users.edit', id=request.session['auth_id']) }}" title="My Profile">
+                                <i class="fa fa-user-circle-o me-2" aria-hidden="true"></i>
+                                <span class="nav-label">My Profile</span>
+                            </a>
+                        </li>
+
+                        <hr style="border-top: 1px solid rgba(255,255,255,0.2);">
+
+                        <li class="nav-item">
+                            <a class="nav-link btn-sidebar {% if request.url.path == url_for('admin.dashboard').path %}active{% endif %}"
                                aria-current="page"
-                               href="{{ url_for('admin.dashboard') }}">
-                                <i class="fa fa-dashboard" aria-hidden="true"></i> {{ gettext('admin.menu.dashboard')}}
+                               href="{{ url_for('admin.dashboard') }}" title="{{ gettext('admin.menu.dashboard')}}">
+                                <i class="fa fa-tachometer me-2" aria-hidden="true"></i>
+                                <span class="nav-label">{{ gettext('admin.menu.dashboard')}}</span>
                             </a>
                         </li>
 
                         {% if request.session.get('auth_role') in ['moderator', 'super_admin'] %}
                         <li class="nav-item">
-                            <a class="nav-link {% if request.url.path.startswith(url_for('admin.users.index').path) %}active{% endif %}"
-                               href="{{ url_for('admin.users.index') }}">
-                                <i class="fa fa-users" aria-hidden="true"></i> {{ gettext('admin.menu.users')}}
+                            <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.users.index').path) and request.url.path != url_for('admin.users.edit', id=request.session['auth_id']).path %}active{% endif %}"
+                               href="{{ url_for('admin.users.index') }}" title="{{ gettext('admin.menu.users')}}">
+                                <i class="fa fa-users me-2" aria-hidden="true"></i>
+                                <span class="nav-label">Users</span>
                             </a>
                         </li>
                         {% endif %}
 
                         {% if request.session.get('auth_role') in ['student', 'super_admin'] %}
-                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                          <span>Student Zone</span>
+                        <h6 class="sidebar-heading px-3 mt-4 mb-2">
+                          <span class="nav-label">Student Zone</span>
                         </h6>
                         <li class="nav-item">
-                            <a class="nav-link {% if request.url.path.startswith(url_for('admin.achievements.index').path) %}active{% endif %}"
-                               href="{{ url_for('admin.achievements.index') }}">
-                                <i class="fa fa-trophy" aria-hidden="true"></i> My Achievements
+                            <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.achievements.index').path) %}active{% endif %}"
+                               href="{{ url_for('admin.achievements.index') }}" title="My Achievements">
+                                <i class="fa fa-trophy me-2" aria-hidden="true"></i>
+                                <span class="nav-label">My Achievements</span>
                             </a>
                         </li>
                         {% endif %}
 
                         {% if request.session.get('auth_role') in ['moderator', 'super_admin'] %}
-                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-                          <span>Moderation</span>
+                        <h6 class="sidebar-heading px-3 mt-4 mb-2">
+                          <span class="nav-label">Moderation</span>
                         </h6>
+
                         <li class="nav-item">
-                            <a class="nav-link {% if request.url.path.startswith(url_for('admin.moderation.users').path) %}active{% endif %}"
-                               href="{{ url_for('admin.moderation.users') }}">
-                                <i class="fa fa-user-plus" aria-hidden="true"></i> Pending Users
+                            <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.moderation.users').path) %}active{% endif %} d-flex justify-content-between align-items-center"
+                               href="{{ url_for('admin.moderation.users') }}" title="Pending Users">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-user-plus me-2" aria-hidden="true"></i>
+                                    <span class="nav-label">Pending Users</span>
+                                </div>
+                                {% if request.state.pending_users_count > 0 %}
+                                    <span class="badge bg-white text-dark rounded-pill nav-badge">{{ request.state.pending_users_count }}</span>
+                                {% endif %}
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link {% if request.url.path.startswith(url_for('admin.moderation.achievements').path) %}active{% endif %}"
-                               href="{{ url_for('admin.moderation.achievements') }}">
-                                <i class="fa fa-check-square-o" aria-hidden="true"></i> Review Achievements
+                            <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.moderation.achievements').path) %}active{% endif %} d-flex justify-content-between align-items-center"
+                               href="{{ url_for('admin.moderation.achievements') }}" title="Review Docs">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-check-square-o me-2" aria-hidden="true"></i>
+                                    <span class="nav-label">Review Docs</span>
+                                </div>
+                                {% if request.state.pending_achievements_count > 0 %}
+                                    <span class="badge bg-white text-dark rounded-pill nav-badge">{{ request.state.pending_achievements_count }}</span>
+                                {% endif %}
                             </a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link {% if request.url.path.startswith(url_for('admin.pages.index').path) %}active{% endif %}"
-                               href="{{ url_for('admin.pages.index') }}">
-                                <i class="fa fa-files-o" aria-hidden="true"></i> All Documents
+                            <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.pages.index').path) %}active{% endif %}"
+                               href="{{ url_for('admin.pages.index') }}" title="All Documents">
+                                <i class="fa fa-files-o me-2" aria-hidden="true"></i>
+                                <span class="nav-label">All Documents</span>
                             </a>
                         </li>
                         {% endif %}
@@ -97,12 +193,11 @@
                 </div>
             </nav>
 
-            <main class="col-md-9 ms-sm-auto col-lg-10 main-content p-4">
-            <div class="row mt-4">
+            <main class="main-content p-4">
+                <div class="row mt-4">
                     <div class="col-12">
-                        <div class="card p-4">
+                        <div class="card p-4 shadow-sm border-0" style="border-radius: 12px;">
                             <div class="card-body">
-
                                    {% block content %}
                                    {% endblock %}
                             </div>
@@ -114,5 +209,53 @@
     </div>
 
     <script src="{{ url_for('static', path='assets/js/bootstrap.bundle.min.js') }}"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const body = document.body;
+            // --- ТЕМНАЯ ТЕМА ---
+            const toggleSwitch = document.querySelector('#darkModeSwitch');
+
+            // Устанавливаем начальное состояние
+            if (localStorage.getItem('theme') === 'dark') {
+                body.classList.add('dark-mode');
+                if(toggleSwitch) toggleSwitch.checked = true;
+            }
+
+            // Добавляем слушателя событий
+            if(toggleSwitch) {
+                toggleSwitch.addEventListener('change', () => {
+                    if (toggleSwitch.checked) {
+                        body.classList.add('dark-mode');
+                        localStorage.setItem('theme', 'dark');
+                    } else {
+                        body.classList.remove('dark-mode');
+                        localStorage.setItem('theme', 'light');
+                    }
+                });
+            }
+
+            // --- СВОРАЧИВАНИЕ МЕНЮ ---
+            const sidebarToggle = document.querySelector('#sidebarToggle');
+
+            // Восстанавливаем состояние при загрузке
+            if (localStorage.getItem('sidebar') === 'collapsed') {
+                body.classList.add('sidebar-collapsed');
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    body.classList.toggle('sidebar-collapsed');
+
+                    if (body.classList.contains('sidebar-collapsed')) {
+                        localStorage.setItem('sidebar', 'collapsed');
+                    } else {
+                        localStorage.setItem('sidebar', 'expanded');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

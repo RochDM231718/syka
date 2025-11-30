@@ -16,6 +16,10 @@
                     {{ user.first_name[0] }}{{ user.last_name[0] }}
                 </div>
              {% endif %}
+
+             <span class="badge bg-primary-brand rounded-pill px-3 py-2">
+                 <i class="fa fa-file-text-o"></i> Total Documents: {{ total_docs }}
+             </span>
          </div>
      </div>
 
@@ -47,6 +51,7 @@
      <div class="col-6 mt-3">
          <div class="form-group">
                 <label class="form-label">{{ gettext('admin.users.role') }}</label>
+
                 {% if request.session['auth_role'] == 'super_admin' and request.session['auth_id'] != user.id %}
                     <form action="{{ url_for('admin.users.update_role', id=user.id) }}" method="post" class="d-flex">
                         <select name="role" class="form-control me-2">
@@ -73,8 +78,8 @@
 </div>
 
 <div class="row mt-5">
-    <div class="col-12">
-        <h4 class="mb-4 text-muted border-bottom pb-2">Uploaded Documents ({{ achievements|length }})</h4>
+    <div class="col-12 d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
+        <h4 class="mb-0 text-muted">Uploaded Documents</h4>
     </div>
 
     {% if achievements %}

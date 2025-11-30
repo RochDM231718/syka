@@ -2,8 +2,9 @@
 {% set title = "My Achievements" %}
 {% block content %}
 <div class="row mb-3">
-    <div class="col-6">
-        <h3>My Achievements</h3>
+    <div class="col-6 d-flex align-items-center">
+        <h3 class="mb-0 me-3">My Achievements</h3>
+        <span class="badge bg-primary-brand">Total: {{ total_count }}</span>
     </div>
     <div class="col-6 text-end">
         <a href="{{ url_for('admin.achievements.create') }}" class="btn btn-primary rounded-3">
@@ -30,6 +31,13 @@
                     <strong>{{ achievement.title }}</strong>
                     {% if achievement.description %}
                         <br><small class="text-muted">{{ achievement.description }}</small>
+                    {% endif %}
+
+                    {% if achievement.status.value == 'rejected' and achievement.rejection_reason %}
+                        <div class="alert alert-danger mt-2 mb-0 p-2 small">
+                            <i class="fa fa-exclamation-circle"></i>
+                            <strong>Reason:</strong> {{ achievement.rejection_reason }}
+                        </div>
                     {% endif %}
                 </td>
                 <td>

@@ -19,43 +19,59 @@ class AchievementService:
         return self.repo.get_by_user(user_id, page)
 
     def create(self, user_id: int, obj_in: AchievementCreate, file: UploadFile):
-        # 1. Сохраняем файл
         file_path = self._save_file(file)
 
-        # 2. Создаем объект модели
         achievement_data = {
             "user_id": user_id,
             "title": obj_in.title,
             "description": obj_in.description,
             "file_path": file_path,
-            "status": AchievementStatus.PENDING  # Статус по умолчанию "На проверке"
+            "status": AchievementStatus.PENDING
         }
 
         return self.repo.create(achievement_data)
 
-    def delete(self, id: int, user_id: int):
-        # Проверяем, принадлежит ли достижение этому пользователю перед удалением
+    def delete(self, id: int, user_id: int, user_role: str):
         achievement = self.repo.find(id)
-        if achievement and achievement.user_id == user_id:
-            # Здесь можно добавить удаление файла с диска, если нужно
+        if not achievement:
+            return False
+
+        is_owner = (achievement.user_id == user_id)
+        is_admin = (user_role in ['moderator', 'super_admin'])
+
+        if is_owner or is_admin:
+            try:
+                full_path = Path(achievement.file_path)
+                if full_path.exists():
+                    full_path.unlink()
+            except Exception as e:
+                print(f"Error deleting file {achievement.file_path}: {e}")
+
             self.repo.delete(id)
             return True
+
         return False
 
     def get_all_pending(self):
-        """Возвращает все достижения со статусом PENDING"""
         return self.repo.getDb().query(Achievement).filter(Achievement.status == AchievementStatus.PENDING).all()
 
-    def update_status(self, id: int, status: str):
-        """Меняет статус достижения (approved / rejected)"""
-        # status приходит как строка из URL, обновляем поле
-        self.repo.update(id, {"status": status})
+    # --- ОБНОВЛЕННЫЙ МЕТОД ---
+    def update_status(self, id: int, status: str, rejection_reason: str = None):
+        """Меняет статус и записывает причину отказа (если есть)"""
+        data = {"status": status}
+
+        if status == "rejected" and rejection_reason:
+            data["rejection_reason"] = rejection_reason
+        elif status == "approved":
+            # Если одобрили, очищаем старую причину отказа (если была)
+            data["rejection_reason"] = None
+
+        self.repo.update(id, data)
 
     def _save_file(self, file: UploadFile) -> str:
         upload_dir = Path("static/uploads/achievements")
         upload_dir.mkdir(parents=True, exist_ok=True)
 
-        # Генерируем уникальное имя файла
         file_extension = file.filename.split('.')[-1] if '.' in file.filename else "dat"
         unique_name = f"{uuid.uuid4()}.{file_extension}"
         file_path = upload_dir / unique_name

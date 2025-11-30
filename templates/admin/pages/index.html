@@ -1,7 +1,10 @@
 {% extends 'layout.html' %}
 {% set title = "All Documents" %}
 {% block content %}
-<h2 class="card-title">All Student Documents</h2>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="card-title mb-0">All Student Documents</h2>
+    <span class="badge bg-secondary fs-6">Total: {{ total_count }}</span>
+</div>
 
 <form method="get" action="{{ url_for('admin.pages.index') }}" class="row position-relative mb-4">
     <div class="col-12">
@@ -50,9 +53,17 @@
                     {% endif %}
                 </td>
                 <td>
-                    <a href="/{{ doc.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                        <i class="fa fa-download"></i> View
-                    </a>
+                    <div class="btn-group">
+                        <a href="/{{ doc.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View File">
+                            <i class="fa fa-download"></i>
+                        </a>
+
+                        <form action="{{ url_for('admin.pages.delete', id=doc.id) }}" method="post" onsubmit="return confirm('Permanently delete this document?');" class="ms-1">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                <i class="fa fa-trash-o"></i>
+                            </button>
+                        </form>
+                    </div>
                 </td>
             </tr>
             {% else %}
@@ -84,7 +95,6 @@ searchInput.addEventListener('input', async function() {
             resultsContainer.innerHTML = '';
             docs.forEach(doc => {
                 const item = document.createElement('a');
-                // При клике идем в профиль студента
                 item.href = `/admin/users/${doc.id}`;
                 item.className = 'list-group-item list-group-item-action';
 
