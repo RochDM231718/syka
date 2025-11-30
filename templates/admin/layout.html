@@ -9,6 +9,7 @@
     <link href="{{ url_for('static', path='assets/css/style.css') }}" rel="stylesheet"/>
 
     <style>
+
         .sidebar-toggle-btn {
             cursor: pointer;
             border: none;
@@ -21,6 +22,7 @@
         body.dark-mode .sidebar-toggle-btn {
             color: var(--brand-purple) !important;
         }
+
 
         .btn-sidebar {
             display: flex;
@@ -40,7 +42,7 @@
              border: 1px solid var(--active-indicator) !important;
         }
 
-        /* Fix: Убираем text-dark из настроек, чтобы применился brand-purple */
+
         .navbar-brand,
         .navbar-nav .nav-link {
             color: var(--brand-purple) !important;
@@ -75,9 +77,24 @@
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fa fa-cog fa-lg" aria-hidden="true"></i> Settings
+                            <i class="fa fa-cog fa-lg" aria-hidden="true"></i> {{ gettext('admin.menu.settings') }}
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown" style="min-width: 220px;">
+
+                            <li><h6 class="dropdown-header text-uppercase small fw-bold">Language / Язык</h6></li>
+                            <li>
+                                <div class="d-flex justify-content-around px-3 pb-2">
+                                    <a href="{{ url_for('admin.set_language', locale='en') }}" class="btn btn-sm {% if request.session.get('locale') == 'en' or not request.session.get('locale') %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                                        EN
+                                    </a>
+                                    <a href="{{ url_for('admin.set_language', locale='ru') }}" class="btn btn-sm {% if request.session.get('locale') == 'ru' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                                        RU
+                                    </a>
+                                </div>
+                            </li>
+
+                            <li><hr class="dropdown-divider"></li>
+
                             <li><h6 class="dropdown-header text-uppercase small fw-bold">Appearance</h6></li>
                             <li>
                                 <div class="dropdown-item d-flex justify-content-between align-items-center" onclick="event.stopPropagation();">
@@ -107,9 +124,9 @@
 
                         <li class="nav-item">
                             <a class="nav-link btn-sidebar {% if request.url.path == url_for('admin.users.edit', id=request.session['auth_id']).path %}active{% endif %}"
-                               href="{{ url_for('admin.users.edit', id=request.session['auth_id']) }}" title="My Profile">
+                               href="{{ url_for('admin.users.edit', id=request.session['auth_id']) }}" title="{{ gettext('admin.menu.profile') }}">
                                 <i class="fa fa-user-circle-o me-2" aria-hidden="true"></i>
-                                <span class="nav-label">My Profile</span>
+                                <span class="nav-label">{{ gettext('admin.menu.profile') }}</span>
                             </a>
                         </li>
 
@@ -129,35 +146,35 @@
                             <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.users.index').path) and request.url.path != url_for('admin.users.edit', id=request.session['auth_id']).path %}active{% endif %}"
                                href="{{ url_for('admin.users.index') }}" title="{{ gettext('admin.menu.users')}}">
                                 <i class="fa fa-users me-2" aria-hidden="true"></i>
-                                <span class="nav-label">Users</span>
+                                <span class="nav-label">{{ gettext('admin.menu.users')}}</span>
                             </a>
                         </li>
                         {% endif %}
 
                         {% if request.session.get('auth_role') in ['student', 'super_admin'] %}
                         <h6 class="sidebar-heading px-3 mt-4 mb-2">
-                          <span class="nav-label">Student Zone</span>
+                          <span class="nav-label">{{ gettext('admin.menu.student_zone') }}</span>
                         </h6>
                         <li class="nav-item">
                             <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.achievements.index').path) %}active{% endif %}"
-                               href="{{ url_for('admin.achievements.index') }}" title="My Achievements">
+                               href="{{ url_for('admin.achievements.index') }}" title="{{ gettext('admin.menu.my_achievements') }}">
                                 <i class="fa fa-trophy me-2" aria-hidden="true"></i>
-                                <span class="nav-label">My Achievements</span>
+                                <span class="nav-label">{{ gettext('admin.menu.my_achievements') }}</span>
                             </a>
                         </li>
                         {% endif %}
 
                         {% if request.session.get('auth_role') in ['moderator', 'super_admin'] %}
                         <h6 class="sidebar-heading px-3 mt-4 mb-2">
-                          <span class="nav-label">Moderation</span>
+                          <span class="nav-label">{{ gettext('admin.menu.moderation') }}</span>
                         </h6>
 
                         <li class="nav-item">
                             <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.moderation.users').path) %}active{% endif %} d-flex justify-content-between align-items-center"
-                               href="{{ url_for('admin.moderation.users') }}" title="Pending Users">
+                               href="{{ url_for('admin.moderation.users') }}" title="{{ gettext('admin.menu.pending_users') }}">
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-user-plus me-2" aria-hidden="true"></i>
-                                    <span class="nav-label">Pending Users</span>
+                                    <span class="nav-label">{{ gettext('admin.menu.pending_users') }}</span>
                                 </div>
                                 {% if request.state.pending_users_count > 0 %}
                                     <span class="badge bg-white text-dark rounded-pill nav-badge">{{ request.state.pending_users_count }}</span>
@@ -167,10 +184,10 @@
 
                         <li class="nav-item">
                             <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.moderation.achievements').path) %}active{% endif %} d-flex justify-content-between align-items-center"
-                               href="{{ url_for('admin.moderation.achievements') }}" title="Review Docs">
+                               href="{{ url_for('admin.moderation.achievements') }}" title="{{ gettext('admin.menu.review_docs') }}">
                                 <div class="d-flex align-items-center">
                                     <i class="fa fa-check-square-o me-2" aria-hidden="true"></i>
-                                    <span class="nav-label">Review Docs</span>
+                                    <span class="nav-label">{{ gettext('admin.menu.review_docs') }}</span>
                                 </div>
                                 {% if request.state.pending_achievements_count > 0 %}
                                     <span class="badge bg-white text-dark rounded-pill nav-badge">{{ request.state.pending_achievements_count }}</span>
@@ -180,9 +197,9 @@
 
                         <li class="nav-item">
                             <a class="nav-link btn-sidebar {% if request.url.path.startswith(url_for('admin.pages.index').path) %}active{% endif %}"
-                               href="{{ url_for('admin.pages.index') }}" title="All Documents">
+                               href="{{ url_for('admin.pages.index') }}" title="{{ gettext('admin.menu.all_documents') }}">
                                 <i class="fa fa-files-o me-2" aria-hidden="true"></i>
-                                <span class="nav-label">All Documents</span>
+                                <span class="nav-label">{{ gettext('admin.menu.all_documents') }}</span>
                             </a>
                         </li>
                         {% endif %}
@@ -210,8 +227,8 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const body = document.body;
             const toggleSwitch = document.querySelector('#darkModeSwitch');
+            const body = document.body;
 
             if (localStorage.getItem('theme') === 'dark') {
                 body.classList.add('dark-mode');

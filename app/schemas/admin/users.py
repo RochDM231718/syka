@@ -1,6 +1,6 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from typing import Optional
-from app.models.enums import UserRole
+from app.models.enums import UserRole, UserStatus
 from app.models.user import Users
 
 class UserCreate(BaseModel):
@@ -42,6 +42,8 @@ class UserOut(BaseModel):
     last_name: str
     is_active: bool
     role: UserRole
+    status: Optional[UserStatus] = None # Разрешаем None изначально
+    avatar_path: Optional[str] = None
     phone_number: Optional[str] = ''
 
     model_config = {
@@ -49,9 +51,12 @@ class UserOut(BaseModel):
         "use_enum_values": True
     }
 
-    @property
-    def status(self) -> str:
-        return "Active" if self.is_active else "Inactive"
+    @field_validator("status", mode="before")
+    @classmethod
+    def set_default_status(cls, v):
+        if v is None:
+            return UserStatus.ACTIVE
+        return v
 
     @property
     def role_label(self) -> str:

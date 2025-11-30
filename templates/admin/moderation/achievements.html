@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
-{% set title = "Pending Achievements" %}
+{% set title = gettext('admin.moderation.pending_docs_title') %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Pending Achievements</h3>
-    <span class="badge bg-secondary fs-6">Total: {{ total_count }}</span>
+    <h3 class="mb-0">{{ title }}</h3>
+    <span class="badge bg-secondary fs-6">{{ gettext('admin.total') }}: {{ total_count }}</span>
 </div>
 
 <div class="card shadow-sm">
@@ -12,67 +12,55 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th>Student</th>
-                        <th>Achievement</th>
-                        <th>File</th>
-                        <th>Date</th>
-                        <th>Actions</th>
+                        <th>{{ gettext('admin.moderation.student') }}</th>
+                        <th>{{ gettext('admin.moderation.achievement') }}</th>
+                        <th>{{ gettext('admin.achievements.file') }}</th>
+                        <th>{{ gettext('admin.achievements.date') }}</th>
+                        <th>{{ gettext('admin.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for item in achievements %}
                     <tr>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <div class="fw-bold">{{ item.user.first_name }} {{ item.user.last_name }}</div>
-                            </div>
+                            <div class="fw-bold">{{ item.user.first_name }} {{ item.user.last_name }}</div>
                             <small class="text-muted">{{ item.user.email }}</small>
                         </td>
                         <td>
                             <strong>{{ item.title }}</strong>
-                            {% if item.description %}
-                                <br><small class="text-muted">{{ item.description }}</small>
-                            {% endif %}
+                            {% if item.description %}<br><small class="text-muted">{{ item.description }}</small>{% endif %}
                         </td>
                         <td>
                             <a href="/{{ item.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                <i class="fa fa-eye"></i> View File
+                                <i class="fa fa-eye"></i> {{ gettext('admin.btn.view') }}
                             </a>
                         </td>
-                        <td>
-                            {{ item.created_at.strftime('%Y-%m-%d') }}
-                        </td>
+                        <td>{{ item.created_at.strftime('%Y-%m-%d') }}</td>
                         <td>
                             <div class="btn-group" role="group">
                                 <form action="{{ url_for('admin.moderation.achievements.update', id=item.id, status='approved') }}" method="post" class="me-1">
-                                    <button type="submit" class="btn btn-sm btn-success" title="Approve">
+                                    <button type="submit" class="btn btn-sm btn-success" title="{{ gettext('admin.btn.approve') }}">
                                         <i class="fa fa-check"></i>
                                     </button>
                                 </form>
-
-                                <button type="button" class="btn btn-sm btn-danger"
-                                        data-bs-toggle="collapse"
-                                        data-bs-target="#rejectRow{{ item.id }}"
-                                        aria-expanded="false"
-                                        title="Reject">
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="collapse" data-bs-target="#rejectRow{{ item.id }}" title="{{ gettext('admin.btn.reject') }}">
                                     <i class="fa fa-times"></i>
                                 </button>
                             </div>
                         </td>
                     </tr>
-
                     <tr>
                         <td colspan="5" class="p-0 border-0">
                             <div class="collapse bg-light" id="rejectRow{{ item.id }}">
                                 <div class="p-3 border-bottom">
                                     <form action="{{ url_for('admin.moderation.achievements.update', id=item.id, status='rejected') }}" method="post">
                                         <div class="mb-2">
-                                            <label class="form-label small fw-bold text-danger">Reason for rejection:</label>
-                                            <textarea name="reason" class="form-control form-control-sm" rows="2" placeholder="Explain why this document is rejected..." required></textarea>
+                                            <label class="form-label small fw-bold text-danger">{{ gettext('admin.moderation.reject_reason') }}</label>
+                                            <textarea name="reason" class="form-control form-control-sm" rows="2" required></textarea>
                                         </div>
                                         <div class="text-end">
-                                            <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse" data-bs-target="#rejectRow{{ item.id }}">Cancel</button>
-                                            <button type="submit" class="btn btn-sm btn-danger">Confirm Rejection</button>
+                                            <button type="button" class="btn btn-sm btn-secondary me-1" data-bs-toggle="collapse" data-bs-target="#rejectRow{{ item.id }}">{{ gettext('admin.cancel') }}</button>
+                                            <button type="submit" class="btn btn-sm btn-danger">{{ gettext('admin.moderation.confirm_rejection') }}</button>
                                         </div>
                                     </form>
                                 </div>
@@ -81,9 +69,7 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">
-                            No pending achievements to review.
-                        </td>
+                        <td colspan="5" class="text-center py-4 text-muted">{{ gettext('admin.moderation.no_pending_docs') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -3,14 +3,14 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-2">
     <h2 class="card-title mb-0">{{ title }}</h2>
-    <span class="badge bg-secondary fs-6">Total: {{ total_count }}</span>
+    <span class="badge bg-secondary fs-6">{{ gettext('admin.total') }}: {{ total_count }}</span>
 </div>
 
 <form method="get" action="{{ url_for('admin.users.index') }}" class="row position-relative">
     <div class="col-12">
         <div class="input-group mb-3">
-            <span class="input-group-text" id="query-search"><i class="fa fa-search" aria-hidden="true"></i></span>
-            <input type="text" class="form-control" id="user-search-input" name="query" value="{{ query }}" placeholder="{{ gettext('admin.users.search') }}" aria-describedby="query-search" autocomplete="off">
+            <span class="input-group-text" id="query-search"><i class="fa fa-search"></i></span>
+            <input type="text" class="form-control" id="user-search-input" name="query" value="{{ query }}" placeholder="{{ gettext('admin.users.search') }}" autocomplete="off">
         </div>
         <div id="search-results" class="list-group position-absolute w-100 shadow" style="z-index: 1000; top: 40px; display: none;">
         </div>
@@ -43,31 +43,29 @@
                 </div>
             </td>
             <td>{{ user.email }}</td>
-            <td><span class="badge bg-secondary">{{ user.role.value }}</span></td>
+            <td><span class="badge bg-secondary">{{ user.role|title }}</span></td>
             <td>{{ user.phone_number }}</td>
             <td>
-                {% if user.status.value == 'active' %}
-                    <span class="badge bg-success">Active</span>
-                {% elif user.status.value == 'pending' %}
-                    <span class="badge bg-warning text-dark">Pending</span>
+                {% if user.status == 'active' %}
+                    <span class="badge bg-success">{{ gettext('admin.status.active') }}</span>
+                {% elif user.status == 'pending' %}
+                    <span class="badge bg-warning text-dark">{{ gettext('admin.status.pending') }}</span>
                 {% else %}
-                    <span class="badge bg-danger">{{ user.status.value }}</span>
+                    <span class="badge bg-danger">{{ gettext('admin.status.banned') }}</span>
                 {% endif %}
             </td>
             <td class="text-end">
-                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.users.show', id=user.id) }}" title="View Profile">
-                     <i class="fa fa-eye" aria-hidden="true"></i>
+                <a class="btn btn-sm btn-outline-primary" href="{{ url_for('admin.users.show', id=user.id) }}" title="{{ gettext('admin.btn.view') }}">
+                     <i class="fa fa-eye"></i>
                 </a>
-
                 {% if request.session['auth_id'] == user.id %}
-                <a class="btn btn-sm btn-light" href="{{ url_for('admin.users.edit', id=user.id) }}" title="Edit My Profile">
-                     <i class="fa fa-pencil" aria-hidden="true"></i>
+                <a class="btn btn-sm btn-light" href="{{ url_for('admin.users.edit', id=user.id) }}" title="Edit">
+                     <i class="fa fa-pencil"></i>
                 </a>
                 {% endif %}
-
                 {% if request.session['auth_id'] != user.id and request.session['auth_role'] in ['moderator', 'super_admin'] %}
-                    <button class="btn btn-sm btn-danger ms-1" onclick="deleteUser({{ user.id }})" title="Delete User">
-                       <i class="fa fa-trash-o" aria-hidden="true"></i>
+                    <button class="btn btn-sm btn-danger ms-1" onclick="deleteUser({{ user.id }})" title="{{ gettext('admin.btn.delete') }}">
+                       <i class="fa fa-trash-o"></i>
                     </button>
                 {% endif %}
             </td>
@@ -83,11 +81,7 @@
 async function deleteUser(id) {
     if (!confirm("{{ gettext('admin.users.delete_confirmation') }}")) return;
     const res = await fetch(`/admin/users/${id}`, { method: "DELETE" });
-    if (res.ok) {
-        location.reload();
-    } else {
-        alert("{{ gettext('admin.failed_delete') }}");
-    }
+    if (res.ok) { location.reload(); } else { alert("{{ gettext('admin.failed_delete') }}"); }
 }
 
 const searchInput = document.getElementById('user-search-input');
@@ -132,7 +126,6 @@ searchInput.addEventListener('input', async function() {
         console.error('Search error:', error);
     }
 });
-
 document.addEventListener('click', function(e) {
     if (e.target !== searchInput && e.target !== resultsContainer) {
         resultsContainer.style.display = 'none';

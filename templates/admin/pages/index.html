@@ -1,19 +1,18 @@
 {% extends 'layout.html' %}
-{% set title = "All Documents" %}
+{% set title = gettext('admin.pages.title') %}
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="card-title mb-0">All Student Documents</h2>
-    <span class="badge bg-secondary fs-6">Total: {{ total_count }}</span>
+    <h2 class="card-title mb-0">{{ title }}</h2>
+    <span class="badge bg-secondary fs-6">{{ gettext('admin.total') }}: {{ total_count }}</span>
 </div>
 
 <form method="get" action="{{ url_for('admin.pages.index') }}" class="row position-relative mb-4">
     <div class="col-12">
         <div class="input-group">
-            <span class="input-group-text" id="doc-search"><i class="fa fa-search" aria-hidden="true"></i></span>
-            <input type="text" class="form-control" id="doc-search-input" name="query" value="{{ query }}" placeholder="Search by document title or student name..." aria-describedby="doc-search" autocomplete="off">
+            <span class="input-group-text" id="doc-search"><i class="fa fa-search"></i></span>
+            <input type="text" class="form-control" id="doc-search-input" name="query" value="{{ query }}" placeholder="{{ gettext('admin.pages.search') }}" autocomplete="off">
         </div>
-        <div id="doc-results" class="list-group position-absolute w-100 shadow" style="z-index: 1000; top: 40px; display: none;">
-        </div>
+        <div id="doc-results" class="list-group position-absolute w-100 shadow" style="z-index: 1000; top: 40px; display: none;"></div>
     </div>
 </form>
 
@@ -21,107 +20,48 @@
     <table class="table table-hover align-middle">
         <thead>
             <tr>
-                <th>Document Title</th>
-                <th>Student</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Actions</th>
+                <th>{{ gettext('admin.pages.doc_title') }}</th>
+                <th>{{ gettext('admin.pages.student') }}</th>
+                <th>{{ gettext('admin.achievements.date') }}</th>
+                <th>{{ gettext('admin.users.status') }}</th>
+                <th>{{ gettext('admin.actions') }}</th>
             </tr>
         </thead>
         <tbody>
             {% for doc in documents %}
             <tr>
-                <td>
-                    <strong>{{ doc.title }}</strong>
-                </td>
+                <td><strong>{{ doc.title }}</strong></td>
                 <td>
                     <a href="{{ url_for('admin.users.show', id=doc.user.id) }}" class="text-decoration-none">
                         {{ doc.user.first_name }} {{ doc.user.last_name }}
                     </a>
                     <br><small class="text-muted">{{ doc.user.email }}</small>
                 </td>
-                <td>
-                    {{ doc.created_at.strftime('%Y-%m-%d') }}
-                </td>
+                <td>{{ doc.created_at.strftime('%Y-%m-%d') }}</td>
                 <td>
                     {% if doc.status.value == 'pending' %}
-                        <span class="badge bg-warning text-dark">Pending</span>
+                        <span class="badge bg-warning text-dark">{{ gettext('admin.status.pending') }}</span>
                     {% elif doc.status.value == 'approved' %}
-                        <span class="badge bg-success">Approved</span>
+                        <span class="badge bg-success">{{ gettext('admin.status.approved') }}</span>
                     {% else %}
-                        <span class="badge bg-danger">Rejected</span>
+                        <span class="badge bg-danger">{{ gettext('admin.status.rejected') }}</span>
                     {% endif %}
                 </td>
                 <td>
-                    <div class="btn-group">
-                        <a href="/{{ doc.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary" title="View File">
-                            <i class="fa fa-download"></i>
-                        </a>
-
-                        <form action="{{ url_for('admin.pages.delete', id=doc.id) }}" method="post" onsubmit="return confirm('Permanently delete this document?');" class="ms-1">
-                            <button type="submit" class="btn btn-sm btn-danger" title="Delete">
-                                <i class="fa fa-trash-o"></i>
-                            </button>
-                        </form>
-                    </div>
+                    <a href="/{{ doc.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        <i class="fa fa-download"></i>
+                    </a>
+                    <form action="{{ url_for('admin.pages.delete', id=doc.id) }}" method="post" onsubmit="return confirm('Delete?');" class="d-inline ms-1">
+                        <button type="submit" class="btn btn-sm btn-danger"><i class="fa fa-trash-o"></i></button>
+                    </form>
                 </td>
             </tr>
             {% else %}
             <tr>
-                <td colspan="5" class="text-center py-4 text-muted">
-                    No documents found.
-                </td>
+                <td colspan="5" class="text-center py-4 text-muted">{{ gettext('admin.no_items_found') }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
-
-<script>
-const searchInput = document.getElementById('doc-search-input');
-const resultsContainer = document.getElementById('doc-results');
-
-searchInput.addEventListener('input', async function() {
-    const query = this.value.trim();
-    if (query.length < 2) {
-        resultsContainer.style.display = 'none';
-        return;
-    }
-    try {
-        const response = await fetch(`/admin/pages/search?query=${encodeURIComponent(query)}`);
-        const docs = await response.json();
-
-        if (docs.length > 0) {
-            resultsContainer.innerHTML = '';
-            docs.forEach(doc => {
-                const item = document.createElement('a');
-                item.href = `/admin/users/${doc.id}`;
-                item.className = 'list-group-item list-group-item-action';
-
-                item.innerHTML = `
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <span class="fw-bold">${doc.title}</span> <br>
-                            <small class="text-muted">by ${doc.user}</small>
-                        </div>
-                        <span class="badge bg-secondary">${doc.status}</span>
-                    </div>
-                `;
-                resultsContainer.appendChild(item);
-            });
-            resultsContainer.style.display = 'block';
-        } else {
-            resultsContainer.style.display = 'none';
-        }
-    } catch (error) {
-        console.error('Search error:', error);
-    }
-});
-
-document.addEventListener('click', function(e) {
-    if (e.target !== searchInput && e.target !== resultsContainer) {
-        resultsContainer.style.display = 'none';
-    }
-});
-</script>
 {% endblock %}

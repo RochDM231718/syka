@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
-{% set title = "View User - " + user.first_name + " " + user.last_name %}
+{% set title = gettext('admin.users.view_profile') + " - " + user.first_name + " " + user.last_name %}
 {% block content %}
 <div class="row">
       <div class="col-12 mb-4">
-          <h3>View User Profile</h3>
+          <h3>{{ gettext('admin.users.view_profile') }}</h3>
           <a href="{{ url_for('admin.users.index') }}" class="btn btn-light rounded-3 float-end">{{ gettext('admin.back') }}</a>
       </div>
 
@@ -18,7 +18,7 @@
              {% endif %}
 
              <span class="badge bg-primary-brand rounded-pill px-3 py-2">
-                 <i class="fa fa-file-text-o"></i> Total Documents: {{ total_docs }}
+                 <i class="fa fa-file-text-o"></i> {{ gettext('admin.total_documents') }}: {{ total_docs }}
              </span>
          </div>
      </div>
@@ -61,7 +61,7 @@
                                 </option>
                              {% endfor %}
                         </select>
-                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="submit" class="btn btn-primary">{{ gettext('admin.update') }}</button>
                     </form>
                 {% else %}
                     <input type="text" value="{{ user.role.value | replace('_', ' ') | title }}" class="form-control" disabled>
@@ -79,7 +79,7 @@
 
 <div class="row mt-5">
     <div class="col-12 d-flex justify-content-between align-items-center border-bottom pb-2 mb-4">
-        <h4 class="mb-0 text-muted">Uploaded Documents</h4>
+        <h4 class="mb-0 text-muted">{{ gettext('admin.uploaded_documents') }}</h4>
     </div>
 
     {% if achievements %}
@@ -102,22 +102,22 @@
 
                     <div class="mb-2">
                         {% if item.status.value == 'pending' %}
-                            <span class="badge bg-warning text-dark">Pending</span>
+                            <span class="badge bg-warning text-dark">{{ gettext('admin.status.pending') }}</span>
                         {% elif item.status.value == 'approved' %}
-                            <span class="badge bg-success">Approved</span>
+                            <span class="badge bg-success">{{ gettext('admin.status.approved') }}</span>
                         {% else %}
-                            <span class="badge bg-danger">Rejected</span>
+                            <span class="badge bg-danger">{{ gettext('admin.status.rejected') }}</span>
                         {% endif %}
                     </div>
 
-                    <a href="/{{ item.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">Open</a>
+                    <a href="/{{ item.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary w-100">{{ gettext('admin.btn.open') }}</a>
                 </div>
             </div>
         </div>
         {% endfor %}
     {% else %}
         <div class="col-12 text-center text-muted">
-            <p>User hasn't uploaded any documents yet.</p>
+            <p>{{ gettext('admin.user_no_docs') }}</p>
         </div>
     {% endif %}
 </div>

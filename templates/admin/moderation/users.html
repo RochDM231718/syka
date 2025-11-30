@@ -1,9 +1,11 @@
 {% extends 'layout.html' %}
-{% set title = "Pending Users" %}
+{% set title = gettext('admin.moderation.pending_users_title') %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Pending User Registrations</h3>
-    <span class="badge bg-secondary fs-6">Total: {{ total_count }}</span>
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between">
+        <h3>{{ title }}</h3>
+        <span class="badge bg-secondary fs-6">{{ gettext('admin.total') }}: {{ total_count }}</span>
+    </div>
 </div>
 
 <div class="card shadow-sm">
@@ -12,10 +14,10 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light">
                     <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Actions</th>
+                        <th>{{ gettext('admin.users.user') }}</th>
+                        <th>{{ gettext('admin.users.email') }}</th>
+                        <th>{{ gettext('admin.users.status') }}</th>
+                        <th>{{ gettext('admin.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,35 +28,25 @@
                                 <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center text-white me-3" style="width: 40px; height: 40px;">
                                     {{ user.first_name[0] }}{{ user.last_name[0] }}
                                 </div>
-                                <div>
-                                    <div class="fw-bold">{{ user.first_name }} {{ user.last_name }}</div>
-                                </div>
+                                <div class="fw-bold">{{ user.first_name }} {{ user.last_name }}</div>
                             </div>
                         </td>
                         <td>{{ user.email }}</td>
-                        <td>
-                            <span class="badge bg-warning text-dark">{{ user.status.value.upper() }}</span>
-                        </td>
+                        <td><span class="badge bg-warning text-dark">{{ gettext('admin.status.pending') }}</span></td>
                         <td>
                             <div class="d-flex gap-2">
                                 <form action="{{ url_for('admin.moderation.users.approve', id=user.id) }}" method="post">
-                                    <button type="submit" class="btn btn-sm btn-success text-white">
-                                        <i class="fa fa-check"></i> Approve
-                                    </button>
+                                    <button type="submit" class="btn btn-sm btn-success text-white"><i class="fa fa-check"></i> {{ gettext('admin.btn.approve') }}</button>
                                 </form>
-                                <form action="{{ url_for('admin.moderation.users.reject', id=user.id) }}" method="post" onsubmit="return confirm('Reject and delete this user?');">
-                                    <button type="submit" class="btn btn-sm btn-danger text-white">
-                                        <i class="fa fa-times"></i> Reject
-                                    </button>
+                                <form action="{{ url_for('admin.moderation.users.reject', id=user.id) }}" method="post" onsubmit="return confirm('Reject?');">
+                                    <button type="submit" class="btn btn-sm btn-danger text-white"><i class="fa fa-times"></i> {{ gettext('admin.btn.reject') }}</button>
                                 </form>
                             </div>
                         </td>
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="4" class="text-center py-4 text-muted">
-                            No pending users found.
-                        </td>
+                        <td colspan="4" class="text-center py-4 text-muted">{{ gettext('admin.moderation.no_pending_users') }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>

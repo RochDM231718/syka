@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registration - {{ request.state.app_name }}</title>
+    <title>{{ gettext('admin.join_title') }} - {{ request.state.app_name }}</title>
     <link href="{{ url_for('static', path='assets/css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ url_for('static', path='assets/css/font-awesome.min.css') }}" rel="stylesheet"/>
     <link href="{{ url_for('static', path='assets/css/style.css') }}" rel="stylesheet"/>
@@ -15,7 +15,6 @@
             --card-bg-dark: #1e1e1e;
             --text-color-dark: #e0e0e0;
         }
-
         .btn-primary {
             background-color: var(--primary-brand);
             border-color: var(--primary-brand);
@@ -26,7 +25,6 @@
         }
         a { color: var(--primary-brand); }
 
-        /* Dark Mode */
         body.dark-mode {
             background-color: var(--body-bg-dark);
             color: var(--text-color-dark);
@@ -52,8 +50,13 @@
 </head>
 <body>
 
-    <div class="position-absolute top-0 end-0 p-3">
-        <div class="form-check form-switch">
+    <div class="position-absolute top-0 end-0 p-3 d-flex gap-3 align-items-center">
+        <div class="btn-group btn-group-sm">
+            <a href="{{ url_for('admin.set_language', locale='en') }}" class="btn {% if request.session.get('locale') == 'en' or not request.session.get('locale') %}btn-primary{% else %}btn-outline-secondary{% endif %}">EN</a>
+            <a href="{{ url_for('admin.set_language', locale='ru') }}" class="btn {% if request.session.get('locale') == 'ru' %}btn-primary{% else %}btn-outline-secondary{% endif %}">RU</a>
+        </div>
+
+        <div class="form-check form-switch m-0">
             <input class="form-check-input" type="checkbox" id="darkModeSwitch" style="cursor: pointer;">
             <label class="form-check-label" for="darkModeSwitch"><i class="fa fa-moon-o"></i></label>
         </div>
@@ -63,43 +66,41 @@
         <div class="col-md-6 col-lg-5">
             <div class="card p-4 shadow-sm mt-5">
                 <div class="card-body">
-                    <h3 class="card-title text-center mb-4">Join {{ request.state.app_name }}</h3>
+                    <h3 class="card-title text-center mb-4">{{ gettext('admin.join_title') }} {{ request.state.app_name }}</h3>
 
                      {% include 'partials/error_msg.html' %}
 
                      <form role="form" action="{{ request.url_for('register.store') }}" method="post">
                         <div class="row mb-3">
                             <div class="col">
-                                <label for="first_name" class="form-label">First Name</label>
-                                <input type="text" name="first_name" class="form-control" id="first_name" required>
+                                <label class="form-label">{{ gettext('admin.users.first_name') }}</label>
+                                <input type="text" name="first_name" class="form-control" required>
                             </div>
                             <div class="col">
-                                <label for="last_name" class="form-label">Last Name</label>
-                                <input type="text" name="last_name" class="form-control" id="last_name" required>
+                                <label class="form-label">{{ gettext('admin.users.last_name') }}</label>
+                                <input type="text" name="last_name" class="form-control" required>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                                <label for="email" class="form-label">Email address</label>
-                                <input type="email" name="email" class="form-control" id="email" required>
+                                <label class="form-label">{{ gettext('admin.email') }}</label>
+                                <input type="email" name="email" class="form-control" required>
                         </div>
                          <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" id="password" required>
-                                <small class="text-muted" style="font-size: 0.8em;">Min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char.</small>
+                                <label class="form-label">{{ gettext('admin.password') }}</label>
+                                <input type="password" name="password" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                                <label for="password_confirm" class="form-label">Confirm Password</label>
-                                <input type="password" name="password_confirm" class="form-control" id="password_confirm" required>
+                                <label class="form-label">{{ gettext('admin.confirm_password') }}</label>
+                                <input type="password" name="password_confirm" class="form-control" required>
                         </div>
 
                          <div class="d-grid gap-2">
-                             <button type="submit" class="btn btn-primary rounded-3">Register</button>
+                             <button type="submit" class="btn btn-primary rounded-3">{{ gettext('admin.join_title') }}</button>
                          </div>
 
                          <div class="mt-4 text-center border-top pt-3">
-                             <span class="text-muted">Already have an account?</span>
-                             <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none" style="color: var(--primary-brand);">Sign In</a>
+                             <a href="{{ url_for('login') }}" class="fw-bold text-decoration-none" style="color: var(--primary-brand);">{{ gettext('admin.login_link') }}</a>
                          </div>
                      </form>
                 </div>
@@ -107,18 +108,17 @@
         </div>
     </div>
 
+
     <script src="{{ url_for('static', path='assets/js/bootstrap.bundle.min.js') }}"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const toggleSwitch = document.querySelector('#darkModeSwitch');
             const body = document.body;
-
             if (localStorage.getItem('theme') === 'dark') {
                 body.classList.add('dark-mode');
                 toggleSwitch.checked = true;
             }
-
             toggleSwitch.addEventListener('change', () => {
                 if (toggleSwitch.checked) {
                     body.classList.add('dark-mode');

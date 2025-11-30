@@ -1,43 +1,40 @@
 import json
-from pathlib import Path
 import os
-from dotenv import load_dotenv
-load_dotenv()
+from contextvars import ContextVar
+
+current_locale = ContextVar("current_locale", default="en")
+
 
 class TranslationManager:
-    def __init__(self, translation_dir: str = 'translations'):
-        self.translations_dir = Path(translation_dir)
-        self.translations = self._load_translations()
+    def __init__(self, translations_dir='translations'):
+        self.translations_dir = translations_dir
 
-    def _load_translations(self):
-        translations = {}
+        self.translations = {
+            'en': self._load_translations('en.json'),
+            'ru': self._load_translations('ru.json')
+        }
 
-        for file in self.translations_dir.glob('*.json'):
-            lang_code = file.stem
-            with open(file, 'r', encoding='utf-8') as f:
-                translations[lang_code] = json.load(f)
+    def _load_translations(self, filename):
+        path = os.path.join(self.translations_dir, filename)
+        if os.path.exists(path):
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        return {}
 
-        return translations
+    def gettext(self, key, replacements=None):
 
-    def gettext(self, key: str, replacements: dict = None, lang: str = None):
-        if lang is None:
-            lang = os.getenv("LANGUAGE")
-        lang_data = self.translations.get(lang, self.translations.get("en", {}))
-        current_data = lang_data
-        keys = key.split('.')
+        locale = current_locale.get()
 
-        for part in keys:
-            if isinstance(current_data, dict) and part in current_data:
-                current_data = current_data[part]
-            else:
-                return key
+        dictionary = self.translations.get(locale, self.translations.get('en', {}))
 
-        if isinstance(current_data, str):
-            if replacements:
-                try:
-                    current_data = current_data.format(**replacements)
-                except KeyError:
-                    pass
-            return current_data
-        else:
-            return key
+        text = dictionary.get(key, key)
+
+        if replacements:
+            try:
+                return text.format(**replacements)
+            except KeyError:
+                return text
+        return text
+
+    def get_supported_locales(self):
+        return list(self.translations.keys())
